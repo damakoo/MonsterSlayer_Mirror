@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
 using System.Text.RegularExpressions;
 using System.Linq;
 using Mirror;
@@ -10,7 +9,6 @@ public class PracticeSet: NetworkBehaviour
 {
     private List<Vector3> FieldCardPotential = new List<Vector3>();
     BlackJackManager _BlackJackManager { get; set; }
-    private PhotonView _PhotonView;
     public int MySelectedCard { get; set; }
     public int YourSelectedCard { get; set; }
     public List<float> MySelectedTime { get; set; }
@@ -81,8 +79,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void SetYourSelectedCard(int card)
     {
-        YourSelectedCard = card;
-        _PhotonView.RPC("UpdateYourSelectedCardOnAllClients", RpcTarget.Others, card);
+        //YourSelectedCard = card;
+        UpdateYourSelectedCardOnAllClients(card);
     }
     [ClientRpc]
     void UpdateYourSelectedCardOnAllClients(int _Number)
@@ -96,9 +94,9 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void SetMyCardsPracticeList(List<List<Vector3>> _MyCardsPracticeList)
     {
-        List<List<Vector3>> temp = _MyCardsPracticeList;
-        MyCardsPracticeList = temp;
-        _PhotonView.RPC("UpdateMyCardsPracticeListOnAllClients", RpcTarget.Others, SerializeCardList(_MyCardsPracticeList));
+        //List<List<Vector3>> temp = _MyCardsPracticeList;
+        //MyCardsPracticeList = temp;
+        UpdateMyCardsPracticeListOnAllClients(SerializeCardList(_MyCardsPracticeList));
     }
     [ClientRpc]
     void UpdateMyCardsPracticeListOnAllClients(string serializeCards)
@@ -109,9 +107,9 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void SetFieldCardsList(List<Vector3> _FieldCardsPracticeList)
     {
-        List<Vector3> temp = FieldCardsPracticeList;
-        FieldCardsPracticeList = temp;
-        _PhotonView.RPC("UpdateFieldCardsPracticeListOnAllClients", RpcTarget.Others, SerializeFieldCard(_FieldCardsPracticeList));
+        //List<Vector3> temp = FieldCardsPracticeList;
+        //FieldCardsPracticeList = temp;
+        UpdateFieldCardsPracticeListOnAllClients(SerializeFieldCard(_FieldCardsPracticeList));
     }
     [ClientRpc]
     void UpdateFieldCardsPracticeListOnAllClients(string serializeCards)
@@ -250,8 +248,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void SetBlackJackState(BlackJackStateList _BlackJackState)
     {
-        BlackJackState = _BlackJackState;
-        _PhotonView.RPC("UpdateBlackJackStateListOnAllClients", RpcTarget.Others, SerializeBlackJackState(_BlackJackState));
+        //BlackJackState = _BlackJackState;
+        UpdateBlackJackStateListOnAllClients(SerializeBlackJackState(_BlackJackState));
     }
     [ClientRpc]
     void UpdateBlackJackStateListOnAllClients(string serializeCards)
@@ -280,7 +278,6 @@ public class PracticeSet: NetworkBehaviour
     List<Vector3> MyCards;
     private void Start()
     {
-        _PhotonView = GetComponent<PhotonView>();
         _BlackJackManager = GameObject.FindWithTag("Manager").GetComponent<BlackJackManager>();
     }
     public void UpdateParameter()
@@ -304,8 +301,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void InitializeCard()
     {
-        _BlackJackManager.InitializeCard();
-        _PhotonView.RPC("RPCInitializeCard", RpcTarget.Others);
+        //_BlackJackManager.InitializeCard();
+        RPCInitializeCard();
     }
     [ClientRpc]
     void RPCInitializeCard()
@@ -496,8 +493,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MoveToWaitForNextTrial(int _nowTrial)
     {
-        _BlackJackManager.MoveToWaitForNextTrial(_nowTrial);
-        _PhotonView.RPC("RPCMoveToWaitForNextTrial", RpcTarget.Others, _nowTrial);
+        //_BlackJackManager.MoveToWaitForNextTrial(_nowTrial);
+        RPCMoveToWaitForNextTrial(_nowTrial);
     }
     [ClientRpc]
     void RPCMoveToWaitForNextTrial(int _nowTrial)
@@ -509,8 +506,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MoveToShowMyCards()
     {
-        _BlackJackManager.MoveToShowMyCards();
-        _PhotonView.RPC("RPCMoveToShowMyCards", RpcTarget.Others);
+        //_BlackJackManager.MoveToShowMyCards();
+        RPCMoveToShowMyCards();
     }
     [ClientRpc]
     void RPCMoveToShowMyCards()
@@ -522,8 +519,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MoveToSelectCards()
     {
-        _BlackJackManager.MoveToSelectCards();
-        _PhotonView.RPC("RPCMoveToSelectCards", RpcTarget.Others);
+        //_BlackJackManager.MoveToSelectCards();
+        RPCMoveToSelectCards();
     }
     [ClientRpc]
     void RPCMoveToSelectCards()
@@ -534,8 +531,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MoveToSelectBet()
     {
-        _BlackJackManager.MoveToSelectBet();
-        _PhotonView.RPC("RPCMoveToSelectBet", RpcTarget.Others);
+        //_BlackJackManager.MoveToSelectBet();
+        RPCMoveToSelectBet();
     }
     [ClientRpc]
     void RPCMoveToSelectBet()
@@ -546,8 +543,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MoveToShowResult()
     {
-        _BlackJackManager.MoveToShowResult();
-        _PhotonView.RPC("RPCMoveToShowResult", RpcTarget.Others);
+        //_BlackJackManager.MoveToShowResult();
+        RPCMoveToShowResult();
     }
     [ClientRpc]
     void RPCMoveToShowResult()
@@ -558,8 +555,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MakeReadyHost()
     {
-       _BlackJackManager.MakeReadyHost();
-        _PhotonView.RPC("RPCMakeReadyHost", RpcTarget.Others);
+       //_BlackJackManager.MakeReadyHost();
+        RPCMakeReadyHost();
     }
     [ClientRpc]
     void RPCMakeReadyHost()
@@ -570,8 +567,8 @@ public class PracticeSet: NetworkBehaviour
     [Command]
     public void MakeReadyClient()
     {
-        _BlackJackManager.MakeReadyClient();
-        _PhotonView.RPC("RPCMakeReadyClient", RpcTarget.Others);
+        //_BlackJackManager.MakeReadyClient();
+        RPCMakeReadyClient();
     }
     [ClientRpc]
     void RPCMakeReadyClient()
