@@ -1,24 +1,27 @@
-using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
+using Mirror;
 
-public class PhotonNetWorkStarter: MonoBehaviourPunCallbacks
+public class PhotonNetWorkStarter: MonoBehaviour
 {
     [SerializeField] DecideHostorClient _DecideHostorClient;
-    private void Start()
+
+
+    // ホストボタン押下時に呼ばれる
+    public void OnHostStart()
     {
-        PhotonNetwork.ConnectUsingSettings();
+        GetComponent<NetworkManager>().StartHost();
     }
 
-    public override void OnConnectedToMaster()
+    // クライアントボタン押下時に呼ばれる
+    public void OnClientStart()
     {
-        PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions(), TypedLobby.Default);
+        GetComponent<NetworkManager>().networkAddress = "localhost"; // IP指定
+        GetComponent<NetworkManager>().StartClient();
     }
 
-    public override void OnJoinedRoom()
+    // セーバーボタン押下時に呼ばれる
+    public void OnServerStart()
     {
-        GameObject practiceset = PhotonNetwork.Instantiate("PracticeSet", Vector3.zero, Quaternion.identity);
-        _DecideHostorClient._practiceSet = practiceset.GetComponent<PracticeSet>();
-        _DecideHostorClient.isConnecting = true;
+        GetComponent<NetworkManager>().StartServer();
     }
 }

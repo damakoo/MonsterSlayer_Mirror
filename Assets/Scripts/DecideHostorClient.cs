@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
+using Mirror;
 
 public class DecideHostorClient : MonoBehaviour
 {
@@ -9,6 +9,7 @@ public class DecideHostorClient : MonoBehaviour
     public bool ClientReady { get; set; } = false;
     [SerializeField] BlackJackManager _BlackJackManager;
     [SerializeField] GameObject WaitforAnother;
+    [SerializeField] PhotonNetWorkStarter _photonNetWorkStarter;
     bool tryConnetcion = false;
     public bool isConnecting { get; set; } = false;
     public PracticeSet _practiceSet { get; set; }
@@ -27,12 +28,14 @@ public class DecideHostorClient : MonoBehaviour
                 if (hit.collider.gameObject.name == "Host")
                 {
                     _BlackJackManager._hostorclient = BlackJackManager.HostorClient.Host;
+                    _photonNetWorkStarter.OnHostStart();
                     WaitforAnother.SetActive(true);
                     tryConnetcion = true;
                 }
                 else if (hit.collider.gameObject.name == "Client")
                 {
                     _BlackJackManager._hostorclient = BlackJackManager.HostorClient.Client;
+                    _photonNetWorkStarter.OnClientStart();
                     WaitforAnother.SetActive(true);
                     tryConnetcion = true;
                 }
@@ -43,15 +46,11 @@ public class DecideHostorClient : MonoBehaviour
         {
             if (isConnecting)
             {
-                if (PhotonNetwork.CurrentRoom.PlayerCount > 1)
-                {
-                    if (_BlackJackManager._hostorclient == BlackJackManager.HostorClient.Client)
+
+                    NetworkIdentity[] photonviews = FindObjectsOfType<NetworkIdentity>();
+                    foreach (var _photonview in photonviews)
                     {
-                        PhotonView[] photonviews = FindObjectsOfType<PhotonView>();
-                        foreach (var _photonview in photonviews)
-                        {
-                            if (!_photonview.IsMine) _practiceSet = _photonview.gameObject.GetComponent<PracticeSet>();
-                        }
+                            if (_photonview.isServer) _practiceSet = _photonview.gameObject.GetComponent<PracticeSet>();
                     }                    
                     _BlackJackManager.SetPracticeSet(_practiceSet);
                     if (_BlackJackManager._hostorclient == BlackJackManager.HostorClient.Host)
@@ -74,8 +73,7 @@ public class DecideHostorClient : MonoBehaviour
                             _BlackJackManager.SetClientUI(true);
                         }
                         this.gameObject.SetActive(false);
-                    }
-                }
+                    }                
             }
         }
     }

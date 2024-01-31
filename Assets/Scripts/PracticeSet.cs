@@ -3,12 +3,12 @@ using UnityEngine;
 using Photon.Pun;
 using System.Text.RegularExpressions;
 using System.Linq;
+using Mirror;
 
 
-public class PracticeSet: MonoBehaviourPunCallbacks
+public class PracticeSet: NetworkBehaviour
 {
     private List<Vector3> FieldCardPotential = new List<Vector3>();
-    private List<(int, int, int)> MyCardPotential;
     BlackJackManager _BlackJackManager { get; set; }
     private PhotonView _PhotonView;
     public int MySelectedCard { get; set; }
@@ -17,67 +17,74 @@ public class PracticeSet: MonoBehaviourPunCallbacks
     public List<float> YourSelectedTime { get; set; }
     public int MySelectedBet { get; set; }
     public int YourSelectedBet { get; set; }
+
+    [Command]
     public void SetMySelectedBet(int bet)
     {
-        MySelectedBet = bet;
-        _PhotonView.RPC("UpdateMySelectedBetOnAllClients", RpcTarget.Others, bet);
+        //MySelectedBet = bet;
+        UpdateMySelectedBetOnAllClients(bet);
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateMySelectedBetOnAllClients(int bet)
     {
         // ここでカードデータを再構築
         MySelectedBet = bet;
     }
+    [Command]
     public void SetYourSelectedBet(int bet)
     {
-        YourSelectedBet = bet;
-        _PhotonView.RPC("UpdateYourSelectedBetOnAllClients", RpcTarget.Others, bet);
+        //YourSelectedBet = bet;
+        UpdateYourSelectedBetOnAllClients(bet);
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateYourSelectedBetOnAllClients(int bet)
     {
         // ここでカードデータを再構築
         YourSelectedBet = bet;
     }
+    [Command]
     public void SetMySelectedTime(float time, int trial)
     {
-        MySelectedTime[trial] = time;
-        _PhotonView.RPC("UpdateMySelectedTimeOnAllClients", RpcTarget.Others, time,trial);
+        //MySelectedTime[trial] = time;
+        UpdateMySelectedTimeOnAllClients(time, trial);
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateMySelectedTimeOnAllClients(float time, int trial)
     {
         // ここでカードデータを再構築
         MySelectedTime[trial] = time;
     }
+    [Command]
     public void SetYourSelectedTime(float time, int trial)
     {
-        YourSelectedTime[trial] = time;
-        _PhotonView.RPC("UpdateYourSelectedTimeOnAllClients", RpcTarget.Others, time, trial);
+        //YourSelectedTime[trial] = time;
+        UpdateYourSelectedTimeOnAllClients(time, trial);
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateYourSelectedTimeOnAllClients(float time, int trial)
     {
         // ここでカードデータを再構築
         YourSelectedTime[trial] = time;
     }
+    [Command]
     public void SetMySelectedCard(int card)
     {
-        MySelectedCard = card;
-        _PhotonView.RPC("UpdateMySelectedCardOnAllClients", RpcTarget.Others, card);
+        //MySelectedCard = card;
+        UpdateMySelectedCardOnAllClients(card);
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateMySelectedCardOnAllClients(int _Number)
     {
         // ここでカードデータを再構築
         MySelectedCard = _Number;
     }
+    [Command]
     public void SetYourSelectedCard(int card)
     {
         YourSelectedCard = card;
         _PhotonView.RPC("UpdateYourSelectedCardOnAllClients", RpcTarget.Others, card);
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateYourSelectedCardOnAllClients(int _Number)
     {
         // ここでカードデータを再構築
@@ -85,25 +92,28 @@ public class PracticeSet: MonoBehaviourPunCallbacks
     }
     public List<List<Vector3>> MyCardsPracticeList { get; set; } = new List<List<Vector3>>();
     public List<Vector3> FieldCardsPracticeList /*{ get; set; }*/ = new List<Vector3>();
+
+    [Command]
     public void SetMyCardsPracticeList(List<List<Vector3>> _MyCardsPracticeList)
     {
         List<List<Vector3>> temp = _MyCardsPracticeList;
         MyCardsPracticeList = temp;
         _PhotonView.RPC("UpdateMyCardsPracticeListOnAllClients", RpcTarget.Others, SerializeCardList(_MyCardsPracticeList));
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateMyCardsPracticeListOnAllClients(string serializeCards)
     {
         // ここでカードデータを再構築
         MyCardsPracticeList = DeserializeCardList(serializeCards);
     }
+    [Command]
     public void SetFieldCardsList(List<Vector3> _FieldCardsPracticeList)
     {
         List<Vector3> temp = FieldCardsPracticeList;
         FieldCardsPracticeList = temp;
         _PhotonView.RPC("UpdateFieldCardsPracticeListOnAllClients", RpcTarget.Others, SerializeFieldCard(_FieldCardsPracticeList));
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateFieldCardsPracticeListOnAllClients(string serializeCards)
     {
         // ここでカードデータを再構築
@@ -237,12 +247,13 @@ public class PracticeSet: MonoBehaviourPunCallbacks
     }
     public BlackJackStateList BlackJackState = BlackJackStateList.BeforeStart;
 
+    [Command]
     public void SetBlackJackState(BlackJackStateList _BlackJackState)
     {
         BlackJackState = _BlackJackState;
         _PhotonView.RPC("UpdateBlackJackStateListOnAllClients", RpcTarget.Others, SerializeBlackJackState(_BlackJackState));
     }
-    [PunRPC]
+    [ClientRpc]
     void UpdateBlackJackStateListOnAllClients(string serializeCards)
     {
         // ここでカードデータを再構築
@@ -290,12 +301,13 @@ public class PracticeSet: MonoBehaviourPunCallbacks
         SetFieldCardsList(FieldCardsPracticeList);
         InitializeCard();
     }
+    [Command]
     public void InitializeCard()
     {
         _BlackJackManager.InitializeCard();
         _PhotonView.RPC("RPCInitializeCard", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCInitializeCard()
     {
         // ここでカードデータを再構築
@@ -481,80 +493,87 @@ public class PracticeSet: MonoBehaviourPunCallbacks
         }
     }
 
+    [Command]
     public void MoveToWaitForNextTrial(int _nowTrial)
     {
         _BlackJackManager.MoveToWaitForNextTrial(_nowTrial);
         _PhotonView.RPC("RPCMoveToWaitForNextTrial", RpcTarget.Others, _nowTrial);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMoveToWaitForNextTrial(int _nowTrial)
     {
         // ここでカードデータを再構築
         _BlackJackManager.MoveToWaitForNextTrial(_nowTrial);
     }
 
+    [Command]
     public void MoveToShowMyCards()
     {
         _BlackJackManager.MoveToShowMyCards();
         _PhotonView.RPC("RPCMoveToShowMyCards", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMoveToShowMyCards()
     {
         // ここでカードデータを再構築
         _BlackJackManager.MoveToShowMyCards();
     }
-    
+
+    [Command]
     public void MoveToSelectCards()
     {
         _BlackJackManager.MoveToSelectCards();
         _PhotonView.RPC("RPCMoveToSelectCards", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMoveToSelectCards()
     {
         // ここでカードデータを再構築
         _BlackJackManager.MoveToSelectCards();
     }
+    [Command]
     public void MoveToSelectBet()
     {
         _BlackJackManager.MoveToSelectBet();
         _PhotonView.RPC("RPCMoveToSelectBet", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMoveToSelectBet()
     {
         // ここでカードデータを再構築
         _BlackJackManager.MoveToSelectBet();
     }
+    [Command]
     public void MoveToShowResult()
     {
         _BlackJackManager.MoveToShowResult();
         _PhotonView.RPC("RPCMoveToShowResult", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMoveToShowResult()
     {
         // ここでカードデータを再構築
         _BlackJackManager.MoveToShowResult();
     }
+    [Command]
     public void MakeReadyHost()
     {
        _BlackJackManager.MakeReadyHost();
         _PhotonView.RPC("RPCMakeReadyHost", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMakeReadyHost()
     {
         // ここでカードデータを再構築
         _BlackJackManager.MakeReadyHost();
     }
+    [Command]
     public void MakeReadyClient()
     {
         _BlackJackManager.MakeReadyClient();
         _PhotonView.RPC("RPCMakeReadyClient", RpcTarget.Others);
     }
-    [PunRPC]
+    [ClientRpc]
     void RPCMakeReadyClient()
     {
         // ここでカードデータを再構築
